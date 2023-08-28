@@ -2,25 +2,12 @@ const express = require('express')
 const router = express.Router()
 const { pool, sql } = require("../database/db")
 
+
 //
 router.get("/", async (req, res, next) => {
     const conn = await pool
-    const sqlString = 'select * from quizizz'
+    const sqlString = 'select * from room'
 
-    return await conn.request().query(sqlString, (err, data) => {
-        const result = data.recordset
-        res.send(
-            result
-        )
-    })
-
-})
-
-//Detail
-router.get("/:id", async (req, res, next) => {
-    const id = req.params.id
-    const conn = await pool
-    const sqlString = 'select * from quizizz where id = ' + id
     return await conn.request().query(sqlString, (err, data) => {
         const result = data.recordset
         res.send(
@@ -32,32 +19,31 @@ router.get("/:id", async (req, res, next) => {
 
 
 //Post
-router.post("/add", async (req, res, next) => {
+router.post("/create", async (req, res, next) => {
     const conn = await pool
-    const sqlString = 'insert into quizizz (nameQuiz, createAt, updateAt, questionList) values(@nameQuiz, @createAt, @updateAt,@questionList)'
+    const sqlString = 'insert into room (roomId, username, type) values(@roomId, @username, @type)'
     return await conn.request()
-        .input('nameQuiz', sql.NVarChar, req.body.nameQuiz)
-        .input('createAt', sql.Date, req.body.createAt)
-        .input('updateAt', sql.Date, req.body.updateAt)
-        .input('questionList', sql.NVarChar, JSON.stringify(req.body.questionList))
+        .input('username', sql.NVarChar, req.body.username)
+        .input('roomId', sql.NVarChar, req.body.roomId)
+        .input('type', sql.NVarChar, req.body.type)
+
 
         .query(sqlString, (err, data) => {
             res.json({
-                message: "Successfull add new quizizz",
+                message: "Successfull add new username",
                 data: req.body
             })
         })
 
 })
 
-//Put
+//Update
 router.put("/update/:id", async (req, res, next) => {
     const id = req.params.id
     const conn = await pool
-    const sqlString = 'update quizizz set result = @result where id = ' + id
+    const sqlString = 'update room set socketId = @socketId where id = ' + id
     return await conn.request()
-        .input('result', sql.VarChar(), JSON.stringify(req.body.result))
-
+        .input('socketId', sql.VarChar, req.body.socketId)
         .query(sqlString, (err, data) => {
             res.json({
                 message: "Successfull update  quession",
@@ -71,23 +57,17 @@ router.put("/update/:id", async (req, res, next) => {
 router.delete("/delete/:id", async (req, res, next) => {
     const id = req.params.id
     const conn = await pool
-    const sqlString = 'delete from quizizz where id = ' + id
+    const sqlString = 'delete from room where id = ' + id
     return await conn.request()
 
         .query(sqlString, (err, data) => {
 
             res.send({
-                message: "Successfull delete quession",
+                message: "Successfull delete player",
                 result: data
             })
         })
 
 })
-
-
-
-
-
-
 
 module.exports = router

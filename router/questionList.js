@@ -18,21 +18,18 @@ router.get("/", async (req, res, next) => {
 // Thêm mới
 router.post("/add", async (req, res, next) => {
     const conn = await pool
-    const sqlString =
-        'insert into question (questionId, questionTitle, question_a, question_b, question_c, question_d, timer,answare, score) values(@questionId, @questionTitle, @question_a, @question_b, @question_c, @question_d, @timer, @answare, @score)'
+    const sqlString = 'insert into question (id, questionType, questionTitle, question, timer, answare, score) values(@id, @questionType, @questionTitle, @question, @timer, @answare, @score)'
     return await conn.request()
-        .input('questionId', sql.Int, req.body.questionId)
+        .input('id', sql.NChar, req.body.id)
+        .input('questionType', sql.NVarChar, req.body.questionType)
         .input('questionTitle', sql.NVarChar, req.body.questionTitle)
-        .input('question_a', sql.NVarChar, req.body.question_a)
-        .input('question_b', sql.NVarChar, req.body.question_b)
-        .input('question_c', sql.NVarChar, req.body.question_c)
-        .input('question_d', sql.NVarChar, req.body.question_d)
+        .input('question', sql.NVarChar, JSON.stringify(req.body.question))
         .input('timer', sql.Int, req.body.timer)
-        .input('answare', sql.NVarChar, req.body.answare)
-        .input('score', sql.VarChar, req.body.score)
+        .input('answare', sql.NVarChar, JSON.stringify(req.body.answare))
+        .input('score', sql.Int, req.body.score)
 
         .query(sqlString, (err, data) => {
-            console.log(err)
+
             res.json({
                 message: "Successfull add new quession",
                 data: req.body
@@ -50,10 +47,26 @@ router.delete("/delete/:id", async (req, res, next) => {
     return await conn.request()
 
         .query(sqlString, (err, data) => {
-
+            console.log(data)
             res.send({
                 message: "Successfull delete quession",
                 result: data
+            })
+        })
+
+})
+
+// Xóa tất cả
+router.delete("/delete/all", async (req, res, next) => {
+    const conn = await pool
+    const sqlString = 'truncate table question'
+    return await conn.request()
+
+        .query(sqlString, (err, data) => {
+
+            res.send({
+                message: "Successfull delete quession",
+                data
             })
         })
 
